@@ -1,0 +1,7 @@
+{
+    "Event Prevent Default": {
+      "prefix": ["epd"],
+      "body": ["$0.preventDefault()"],
+      "description": "To place at begining of event handlers when creating custom behavior."
+    }
+  }
