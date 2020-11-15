@@ -1,9 +1,9 @@
-import SuperForm from './SuperForm';
+// import SuperForm from './SuperForm';
 
-describe('SuperForm component', () => {
-    beforeAll(() => {
-    });
-    it('renders', () => {
+// describe('SuperForm component', () => {
+//     beforeAll(() => {
+//     });
+//     it('renders', () => {
     
-    })
-});
+//     })
+// });

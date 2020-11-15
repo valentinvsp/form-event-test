@@ -12,18 +12,37 @@ OR catch the event on the form element and use the array to focus the next targe
 
 const SuperForm = () => {
     const [formData, setFormData] = useState({})
-    const formRef = useRef<HTMLFormElement>(null);
+    const signupForm = useRef(null);
+
+    const createStateObjFromForm = (form) => {
+        let state = {};
+        console.log(form.elements);
+        const inputArray = new Array(...form.elements);
+        console.log(inputArray);
+        inputArray.forEach( input => {
+            if (input.type === 'submit') return;
+            const inputState = {
+                name: input.id,
+                value: input.value,
+                touched: false,
+                error: input.dataset.error
+            }
+            state = {...state, [input.id]: inputState };
+        })
+        console.log('state at end of create state function: \n', state);
+        return state;
+    }
     
     // use the form ref to cycle through form elements and initialize state
     // and add event listeners to the form (using event delegation) to alter state when necessary, validate on blur etc.
     useEffect(() => {
-        if (formRef.current) console.log(formRef.current.elements);
+        if (signupForm.current) setFormData(createStateObjFromForm(signupForm.current));
         return () => {
             
         }
     }, [])
 
-    const handleSubmit = (e: any) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         console.log('SUBMITED')
 
@@ -38,6 +57,7 @@ const SuperForm = () => {
 
         e.target[0].addEventListener('click', () => console.log('clicked'));  // this method of adding event listeners works.
         // use this on mount to cycle through inputs and add "kepress enter" and "blur" event listeners
+        // OR don't, and use event delegation instead
 
 
         // console.log(e.target[0].);
@@ -45,11 +65,12 @@ const SuperForm = () => {
         // e.target.elements.user.validationMessage = 'maybe this works';
         
         console.log(e);
+        console.log('current form state: ', formData);
     }
     
 
     return (
-        <form ref={formRef} action="" noValidate onSubmit={handleSubmit}>
+        <form ref={signupForm} action="" noValidate onSubmit={handleSubmit}>
             <input id="user" type="text" data-error="Must have a user" validation-message="custom message here" required/>
             <input id="email" type="email" data-error="Check if email is correct" required/>
             <div className="wtf">wtf</div>
