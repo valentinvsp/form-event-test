@@ -5,7 +5,7 @@ export enum InputType {
     Button = 'button'
 }
 
-type InputValue = string | number;
+export type InputValue = string | number;
 
 export interface InputOptions {
     name: string;
@@ -114,7 +114,7 @@ export class FormState {
         return [...this.state];
     }
 
-    setInputValue(name: string, value: string) {
+    setInputValue(name: string, value: InputValue) {
         const input = this.state.find( i => i.name === name );
         if ( input ) {
             input.setValue(value);
