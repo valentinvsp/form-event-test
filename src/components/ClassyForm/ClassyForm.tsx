@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Input, InputType, FormState } from './ClassyClasses';
+import { inputData } from './constants'
 
 const ClassyForm: React.FC = () => {
     const [formData, setFormData] = useState<Input[]>();
@@ -7,34 +8,7 @@ const ClassyForm: React.FC = () => {
     const renderCount = useRef(0);
 
     useEffect(() => {
-        const state = new FormState(
-            new Input({
-                name: 'username',
-                type: InputType.Text,
-                label: 'Enter Username:',
-            })
-        );
-        state.addInput(
-            new Input({
-                name: 'email',
-                type: InputType.Email,
-                label: 'Enter Email:',
-            })
-        );
-        state.addInput(
-            new Input({
-                name: 'password',
-                type: InputType.Password,
-                label: 'Enter Password:',
-            })
-        );
-        state.addInput(
-            new Input({
-                name: 'submit button',
-                type: InputType.Button,
-                value: 'SUBMIT',
-            })
-        );
+        const state = new FormState(inputData);
         setFormData(state.getState());
         formObject.current = state;
     }, []);
@@ -44,7 +18,7 @@ const ClassyForm: React.FC = () => {
         const {
             target: { name, value },
         } = e;
-        formObject.current?.changeInput(name, value);
+        formObject.current?.setInputValue(name, value);
         setFormData(formObject.current?.getState());
     };
 
@@ -52,10 +26,10 @@ const ClassyForm: React.FC = () => {
     console.log(`render number ${renderCount.current}`);
     return (
         <form onChange={handleFormChange} onSubmit={e => e.preventDefault()} noValidate>
-            {formData?.map(({ name, type, value, label }) => {
+            {formData?.map(({ id, name, type, value, label }) => {
                 if (type === InputType.Text || type === InputType.Email || type === InputType.Password)
                     return (
-                        <div className="form-group" key={name}>
+                        <div className="form-group" key={id}>
                             {label && <label htmlFor={name}>{label}</label>}
                             <input
                                 type={type}
@@ -74,9 +48,9 @@ const ClassyForm: React.FC = () => {
                         </div>
                     );
                 if (type === InputType.Button) return (
-                    <input type="submit" className="btn btn-primary" value={value}/>
+                    <input key={id} type="submit" className="btn btn-primary" value={value}/>
                 );
-                return null;
+                return <div key={666}>Warning! Incorect input type.</div>;
             })}
         </form>
     );

@@ -6,9 +6,9 @@ import ClassyForm from './components/ClassyForm'
 function App() {
 
   return (
-    <div className="App">
+    <div className="App container pt-5">
       {/* <SuperForm /> */}
-      <hr />
+      {/* <hr /> */}
       <ClassyForm />
     </div>
   );

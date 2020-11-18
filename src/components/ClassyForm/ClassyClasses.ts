@@ -8,7 +8,6 @@ export enum InputType {
 type InputValue = string | number;
 
 export interface InputOptions {
-    id?: number;
     name: string;
     type: InputType;
     value?: InputValue;
@@ -38,7 +37,6 @@ export class Input implements InputOptions {
 
     constructor(options: InputOptions) {
         ({
-            id: this.id,
             name: this.name,
             type: this.type,
             placeholder: this.placeholder,
@@ -60,9 +58,13 @@ export class Input implements InputOptions {
         return valid;
     }
 
-    changeTo(value: InputValue, id?: number) {
+    setId(id: number) {
+        this.id = id;
+    }
+
+    setValue(value: InputValue, id?: number) {
         this.value = value;
-        this.id = id ? id : 0;
+        if (id) this.id =  id;
     }
 
     blur() {
@@ -72,10 +74,18 @@ export class Input implements InputOptions {
 
 export class FormState {
     state: Input[];
-    lastId: number = 1;
+    lastId: number = 0;
 
-    constructor(input?: Input) {
-        this.state = input ? [input] : [];
+    constructor(input?: Input | Input[]) {
+        if (input instanceof Input) {
+            this.lastId++;
+            input.setId(this.lastId);
+            this.state = [ input ];
+        } else if (input instanceof Array) {
+            input.forEach( (i, idx) => i.setId(idx + 1));
+            this.lastId = input.length;
+            this.state = input;
+        } else this.state = [];
     }
 
     addInput(input: Input) {
@@ -104,11 +114,10 @@ export class FormState {
         return [...this.state];
     }
 
-    changeInput(name: string, value: string) {
+    setInputValue(name: string, value: string) {
         const input = this.state.find( i => i.name === name );
         if ( input ) {
-            this.lastId++;
-            input.changeTo(value, this.lastId);
+            input.setValue(value);
             return input;
         } else {
             console.log(`Input with name ${name} does not exist in this FormState instance.`)
