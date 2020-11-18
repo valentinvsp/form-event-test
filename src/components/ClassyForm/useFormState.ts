@@ -1,20 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
-import { FormState, Input, /* InputValue */ } from './ClassyClasses';
+import { FormState, Input } from './ClassyClasses';
 
-export default function useFormState(inputData: Input[]): [ Input[], (e: React.ChangeEvent<HTMLFormElement>) => void ] {
+type hookReturn = [ Input[], (e: React.ChangeEvent<HTMLFormElement>) => void, (arg0: Input[]) => void ];
+
+export default function useFormState(inputData?: Input[]): hookReturn {
     const [form, setForm] = useState<Input[]>([]);
     const formRef = useRef<FormState>()
 
     useEffect(() => {
+        createForm(inputData)
+    }, [])
+
+    const createForm = (inputData?: Input[]) => {
         const createdForm = new FormState(inputData)
         setForm(createdForm.getState());
         formRef.current = createdForm;
-    }, [])
-
-    // const updateForm = (inputName: string, newValue: InputValue) => {
-    //     formRef.current?.setInputValue(inputName, newValue);
-
-    // }
+    }
 
     const updateForm = (e: React.ChangeEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -27,6 +28,6 @@ export default function useFormState(inputData: Input[]): [ Input[], (e: React.C
         }    
     };
 
-    return [form, updateForm];
+    return [form, updateForm, createForm];
 }
 
