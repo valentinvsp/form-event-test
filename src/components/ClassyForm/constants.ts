@@ -5,16 +5,19 @@ export const inputData: Input[] = [
         name: 'username',
         type: InputType.Text,
         label: 'Enter Username:',
+        required: true
     }),
     new Input({
         name: 'email',
         type: InputType.Email,
         label: 'Enter Email:',
+        required: true
     }),
     new Input({
         name: 'password',
         type: InputType.Password,
         label: 'Enter Password:',
+        required: true
     }),
     new Input({
         name: 'submit button',

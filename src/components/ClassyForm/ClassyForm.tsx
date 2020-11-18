@@ -4,7 +4,7 @@ import useFormState from './useFormState';
 import { inputData } from './constants';
 
 const ClassyForm: React.FC = () => {
-    const [formData, updateFormData] = useFormState(inputData);
+    const [formData, updateFormData, handleFormBlur ] = useFormState(inputData);
     const renderCount = useRef(0);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -15,8 +15,8 @@ const ClassyForm: React.FC = () => {
     renderCount.current = renderCount.current + 1;
     console.log(`render number ${renderCount.current}`);
     return (
-        <form onChange={updateFormData} onSubmit={handleSubmit} noValidate>
-            {formData?.map(({ id, name, type, value, checked, label }) => {
+        <form onChange={updateFormData} onBlur={handleFormBlur} onSubmit={handleSubmit} noValidate>
+            {formData?.map(({ id, name, type, value, checked, label, validationError, touched, valid }) => {
                 if (
                     type === InputType.Text ||
                     type === InputType.Email ||
@@ -39,6 +39,11 @@ const ClassyForm: React.FC = () => {
                             >
                                 We'll never share your email with anyone else.
                             </small>
+                            {touched && !valid && <small
+                                className="form-text input-error"
+                            >
+                                {validationError}
+                            </small>}
                         </div>
                     );
                 if (type === InputType.Button)
@@ -60,10 +65,7 @@ const ClassyForm: React.FC = () => {
                                 name={name}
                                 checked={checked}
                             />
-                            <label
-                                className="form-check-label"
-                                htmlFor={name}
-                            >
+                            <label className="form-check-label" htmlFor={name}>
                                 {label}
                             </label>
                         </div>
