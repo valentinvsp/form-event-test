@@ -21,4 +21,18 @@ export const inputData: Input[] = [
         type: InputType.Button,
         value: 'SUBMIT',
     }),
+    new Input({
+        name: 'hungry',
+        type: InputType.Checkbox,
+        value: 'hungry',
+        checked: false,
+        label: 'Are you hungry?'
+    }),
+    new Input({
+        name: 'thirsty',
+        type: InputType.Checkbox,
+        value: 'thirsty',
+        checked: false,
+        label: 'Are you thirsty?'
+    }),
 ];

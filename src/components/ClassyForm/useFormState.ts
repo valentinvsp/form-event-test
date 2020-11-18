@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FormState, Input } from './ClassyClasses';
+import { FormState, Input, InputType } from './ClassyClasses';
 
 type hookReturn = [ Input[], (e: React.ChangeEvent<HTMLFormElement>) => void, (arg0: Input[]) => void ];
 
@@ -18,12 +18,20 @@ export default function useFormState(inputData?: Input[]): hookReturn {
     }
 
     const updateForm = (e: React.ChangeEvent<HTMLFormElement>) => {
-        e.preventDefault();
+        console.log(e);
         const {
-            target: { name, value },
+            target: { name, value, type },
         } = e;
+        
         if (formRef.current) {
-            formRef.current.setInputValue(name, value);
+            if (type === InputType.Checkbox) {
+                formRef.current.toggleInputChecked(name);
+                // Warning! Preventing default on checkboxes will break the desired beahvior.
+            }
+            else {
+                formRef.current.setInputValue(name, value);
+                e.preventDefault();
+            }
             setForm(formRef.current.getState());
         }    
     };

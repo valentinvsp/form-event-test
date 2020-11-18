@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { InputType } from './ClassyClasses';
 import useFormState from './useFormState';
-import { inputData } from './constants'
+import { inputData } from './constants';
 
 const ClassyForm: React.FC = () => {
     const [formData, updateFormData] = useFormState(inputData);
@@ -10,14 +10,18 @@ const ClassyForm: React.FC = () => {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log('submitted');
-    }
+    };
 
     renderCount.current = renderCount.current + 1;
     console.log(`render number ${renderCount.current}`);
     return (
         <form onChange={updateFormData} onSubmit={handleSubmit} noValidate>
-            {formData?.map(({ id, name, type, value, label }) => {
-                if (type === InputType.Text || type === InputType.Email || type === InputType.Password)
+            {formData?.map(({ id, name, type, value, checked, label }) => {
+                if (
+                    type === InputType.Text ||
+                    type === InputType.Email ||
+                    type === InputType.Password
+                )
                     return (
                         <div className="form-group" key={id}>
                             {label && <label htmlFor={name}>{label}</label>}
@@ -37,9 +41,33 @@ const ClassyForm: React.FC = () => {
                             </small>
                         </div>
                     );
-                if (type === InputType.Button) return (
-                    <input key={id} type="submit" className="btn btn-primary" value={value}/>
-                );
+                if (type === InputType.Button)
+                    return (
+                        <input
+                            key={id}
+                            type="submit"
+                            className="btn btn-primary"
+                            value={value}
+                        />
+                    );
+                if (type === InputType.Checkbox)
+                    return (
+                        <div key={id} className="form-group form-check">
+                            <input
+                                type={type}
+                                className="form-check-input"
+                                id={name}
+                                name={name}
+                                checked={checked}
+                            />
+                            <label
+                                className="form-check-label"
+                                htmlFor={name}
+                            >
+                                {label}
+                            </label>
+                        </div>
+                    );
                 return <div key={666}>Warning! Incorect input type.</div>;
             })}
         </form>

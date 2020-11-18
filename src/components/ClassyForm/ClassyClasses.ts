@@ -2,7 +2,8 @@ export enum InputType {
     Text = 'text',
     Email = 'email',
     Password = 'password',
-    Button = 'button'
+    Button = 'button',
+    Checkbox = 'checkbox'
 }
 
 export type InputValue = string | number;
@@ -19,6 +20,7 @@ export interface InputOptions {
     valid?: boolean;
     regex?: RegExp;
     label?: string;
+    checked?: boolean;
 }
 
 export class Input implements InputOptions {
@@ -34,6 +36,7 @@ export class Input implements InputOptions {
     valid: boolean;
     regex?: RegExp;
     label?: string;
+    checked?: boolean;
 
     constructor(options: InputOptions) {
         ({
@@ -43,13 +46,16 @@ export class Input implements InputOptions {
             required: this.required,
             minLength: this.minLength,
             maxLength: this.maxLength,
-            label: this.label
+            label: this.label,
+            checked: this.checked,
         } = options);
 
         this.touched = false;
         this.valid = this.isValid();
         const { value } = options;
         this.value = value ? value : '';
+
+        if (this.type === InputType.Checkbox && typeof this.checked === 'undefined') this.checked = false;
     }
 
     isValid() {
@@ -65,6 +71,10 @@ export class Input implements InputOptions {
     setValue(value: InputValue, id?: number) {
         this.value = value;
         if (id) this.id =  id;
+    }
+
+    toggleChecked() {
+        this.checked = !this.checked;
     }
 
     blur() {
@@ -119,5 +129,13 @@ export class FormState {
         } else {
             throw new Error(`Input with name ${name} does not exist in this FormState instance.`);
         }
+    }
+
+    toggleInputChecked(name: string) {
+        const input = this.state.find( i => i.name === name );
+        if ( !input ) throw new Error(`Input with name ${name} does not exist in this FormState instance.`);
+        if ( input.type !== InputType.Checkbox) throw new Error(`Input with name ${name} does not have type "checkbox".`)
+        input.toggleChecked();
+        return input;
     }
 }
