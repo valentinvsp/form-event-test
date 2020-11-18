@@ -90,10 +90,7 @@ export class FormState {
 
     addInput(input: Input) {
         if (this.state.some(i => i.name === input.name)) {
-            console.log(
-                `Input with name ${input.name} already exists in the form!`
-            ); //throw err?
-            return;
+            throw new TypeError(`Input with name ${input.name} already exists in the form!`);
         }
         this.lastId++;
         input.id = this.lastId;
@@ -120,7 +117,7 @@ export class FormState {
             input.setValue(value);
             return input;
         } else {
-            console.log(`Input with name ${name} does not exist in this FormState instance.`)
+            throw new Error(`Input with name ${name} does not exist in this FormState instance.`);
         }
     }
 }
