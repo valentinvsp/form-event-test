@@ -113,16 +113,32 @@ export class FormState {
     state: Input[];
     lastId: number = 0;
 
-    constructor(input?: Input | Input[]) {
+    constructor(input?: Input | Input[] | InputOptions[]) {
+        this.state = [];
+        if (typeof input === 'undefined') return;
+        if (input instanceof Array && input.length === 0) return;
         if (input instanceof Input) {
-            this.lastId++;
-            input.setId(this.lastId);
+            input.setId(++this.lastId);
             this.state = [input];
-        } else if (input instanceof Array) {
-            input.forEach((i, idx) => i.setId(idx + 1));
-            this.lastId = input.length;
-            this.state = input;
-        } else this.state = [];
+            return;
+        }
+        if (input instanceof Array && input.length > 0) {
+            input.forEach( el => {
+                if (el instanceof Input) {
+                    el.setId(++this.lastId);
+                    return this.state.push(el);
+                }
+                else {
+                    const newEl = new Input(el);
+                    newEl.setId(++this.lastId);
+                    this.state.push(newEl);
+                }
+            })
+            return;
+        }
+        throw new TypeError(`FormState constructor takes one argument, which can be
+         of type Input, Input[], InputOptions[], or an Array containing a mix of Input and InputOptions.
+         Received argument: ${input}`);
     }
 
     addInput(input: Input) {

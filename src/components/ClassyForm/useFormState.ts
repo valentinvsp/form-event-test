@@ -1,17 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
-import { FormState, Input, InputType } from './ClassyClasses';
+import { FormState, Input, InputOptions, InputType } from './ClassyClasses';
 
 type hookReturn = [ Input[], (e: React.ChangeEvent<HTMLFormElement>) => void, (e: React.FocusEvent<HTMLFormElement>) => void, (arg0: Input[]) => void ];
 
-export default function useFormState(inputData?: Input[]): hookReturn {
+export default function useFormState(inputData?: Input | Input[] | InputOptions[]): hookReturn {
     const [form, setForm] = useState<Input[]>([]);
     const formRef = useRef<FormState>()
 
     useEffect(() => {
         createForm(inputData)
-    }, [])
+    }, [inputData])
 
-    const createForm = (inputData?: Input[]) => {
+    const createForm = (inputData?: Input | Input[] | InputOptions[]) => {
         const createdForm = new FormState(inputData)
         setForm(createdForm.getState());
         formRef.current = createdForm;

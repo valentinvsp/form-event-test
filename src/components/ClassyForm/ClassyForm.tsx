@@ -1,19 +1,19 @@
-import React, { useRef } from 'react';
+import React, { /* useRef */ } from 'react';
 import { InputType } from './ClassyClasses';
 import useFormState from './useFormState';
 import { inputData } from './constants';
 
 const ClassyForm: React.FC = () => {
     const [formData, updateFormData, handleFormBlur ] = useFormState(inputData);
-    const renderCount = useRef(0);
+    // const renderCount = useRef(0);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log('submitted');
     };
 
-    renderCount.current = renderCount.current + 1;
-    console.log(`render number ${renderCount.current}`);
+    // renderCount.current = renderCount.current + 1;
+    // console.log(`render number ${renderCount.current}`);
     return (
         <form onChange={updateFormData} onBlur={handleFormBlur} onSubmit={handleSubmit} noValidate>
             {formData?.map(({ id, name, type, value, checked, label, validationError, touched, valid }) => {
