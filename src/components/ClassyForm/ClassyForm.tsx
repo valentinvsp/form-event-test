@@ -27,9 +27,9 @@ const ClassyForm: React.FC = () => {
                         <div className="form-group" key={id}>
                             {label && <label htmlFor={name}>{label}</label>}
                             <input
+                                id={id}
                                 type={type}
                                 className="form-control"
-                                id={name}
                                 name={name}
                                 value={value}
                                 aria-describedby="emailHelp"
@@ -49,12 +49,13 @@ const ClassyForm: React.FC = () => {
                     );
                 if (type === InputType.Button)
                     return (
+                        <div key={id} className="form-group">
                         <input
-                            key={id}
                             type="submit"
-                            className="btn btn-primary"
+                            className="btn btn-primary mt-3"
                             value={value}
                         />
+                        </div>
                     );
                 if (type === InputType.Checkbox)
                     return (
@@ -62,7 +63,7 @@ const ClassyForm: React.FC = () => {
                             <input
                                 type={type}
                                 className="form-check-input"
-                                id={name}
+                                id={id}
                                 name={name}
                                 checked={checked}
                             />
@@ -70,6 +71,22 @@ const ClassyForm: React.FC = () => {
                                 {label}
                             </label>
                         </div>
+                    );
+                    if (type === InputType.Radio)
+                    return (
+                        <div key={id} className="form-check form-check-inline">
+                            <input
+                                type={type}
+                                className="form-check-input"
+                                id={id}
+                                name={name}
+                                checked={checked}
+                                value={value}
+                            />
+                            <label className="form-check-label" htmlFor={name}>
+                                {label}
+                            </label>
+                        </div>                
                     );
                 return <div key={666}>Warning! Incorect input type.</div>;
             })}

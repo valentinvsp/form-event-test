@@ -4,12 +4,14 @@ export enum InputType {
     Password = 'password',
     Button = 'button',
     Checkbox = 'checkbox',
+    Radio = 'radio'
 }
 
 export type InputValue = string | number;
 
 export interface InputOptions {
-    name: string;
+    id: string;
+    name?: string;
     type: InputType;
     value?: InputValue;
     placeholder?: string;
@@ -27,8 +29,8 @@ export interface InputOptions {
 export type InputValidation = [number, string, boolean, string];
 
 export class Input implements InputOptions {
-    id?: number;
-    name: string;
+    id: string;
+    name?: string;
     type: InputType;
     value: InputValue;
     placeholder?: string;
@@ -44,6 +46,7 @@ export class Input implements InputOptions {
 
     constructor(options: InputOptions) {
         ({
+            id: this.id,
             name: this.name,
             type: this.type,
             placeholder: this.placeholder,
@@ -55,11 +58,12 @@ export class Input implements InputOptions {
             checked: this.checked,
         } = options);
 
-        this.touched = false;
-        this.valid = this.isValid();
         const { value, validationError } = options;
         this.value = value ? value : '';
         this.validationError = validationError ? validationError : 'Field is not valid.';
+
+        this.touched = false;
+        this.valid = this.isValid();
 
         if (
             this.type === InputType.Checkbox &&
@@ -75,9 +79,13 @@ export class Input implements InputOptions {
                 )
             )
                 throw new Error(
-                    `Input ${this.name} is assigned a RegExp validator,
-                    but is not of an allowed type. Allowed types are "text", "email" and "password"`
+                    `Input ${this.id} is assigned a RegExp validator,
+                    but is not of an allowed type. Allowed types are "text", "email" and "password".`
                 );
+        if (this.type === InputType.Radio && typeof this.name === 'undefined') throw new Error(
+            `Input ${this.id} is of type "radio", but is not assigned a "name" property.
+            Radio buttons need a "name" property to work properly.`
+        );
     }
 
     isValid() {
@@ -85,18 +93,14 @@ export class Input implements InputOptions {
         if (this.regex)
             if (typeof this.value !== 'string')
                 throw new TypeError(
-                    `Input ${this.name} has a RegExp validator
+                    `Input ${this.id} has a RegExp validator
                      and a value of type ${typeof this.value}. Expected type "string".`
                 );
             else if (this.value.match(this.regex) === null) return false;
         return true;
     }
 
-    setId(id: number) {
-        this.id = id;
-    }
-
-    setValue(value: InputValue) {
+    setValueAndValidate(value: InputValue) {
         this.value = value;
         this.valid = this.isValid();
     }
@@ -110,28 +114,22 @@ export class Input implements InputOptions {
     }
 }
 export class FormState {
-    state: Input[];
-    lastId: number = 0;
+    state: Input[] = [];
 
     constructor(input?: Input | Input[] | InputOptions[]) {
-        this.state = [];
         if (typeof input === 'undefined') return;
         if (input instanceof Array && input.length === 0) return;
         if (input instanceof Input) {
-            input.setId(++this.lastId);
-            this.state = [input];
+            this.addInput(input);
             return;
         }
         if (input instanceof Array && input.length > 0) {
             input.forEach( el => {
                 if (el instanceof Input) {
-                    el.setId(++this.lastId);
-                    return this.state.push(el);
+                    this.addInput(el);
                 }
                 else {
-                    const newEl = new Input(el);
-                    newEl.setId(++this.lastId);
-                    this.state.push(newEl);
+                    this.addInput(new Input(el));
                 }
             })
             return;
@@ -142,21 +140,23 @@ export class FormState {
     }
 
     addInput(input: Input) {
-        if (this.state.some(i => i.name === input.name)) {
+        if (!(input instanceof Input)) throw new TypeError(`${input} must be an instance of Input.`)
+        if (this.state.some(i => i.id === input.id)) {
             throw new TypeError(
-                `Input with name ${input.name} already exists in the form!`
+                `Input with id ${input.id} already exists in the form! Ids must be unique strings.`
             );
         }
-        this.lastId++;
-        input.id = this.lastId;
+        if (input.type === InputType.Radio) {
+            input.checked = this.state.some(i => i.name === input.name) ? false : true;
+        }
         this.state.push(input);
     }
 
-    removeInput(name: string) {
+    removeInputById(id: string) {
         let inputToRemove: string = '';
         this.state.filter(input => {
-            if (input.name !== name) return true;
-            inputToRemove = input.name;
+            if (input.id !== id) return true;
+            inputToRemove = input.id;
             return false;
         });
         return inputToRemove ? inputToRemove : null;
@@ -166,38 +166,55 @@ export class FormState {
         return [...this.state];
     }
 
-    setInputValue(name: string, value: InputValue) {
-        const input = this.state.find(i => i.name === name);
+    setInputValue(id: string, value: InputValue) {
+        const input = this.state.find(i => i.id === id);
         if (input) {
-            input.setValue(value);
+            input.setValueAndValidate(value);
             return input;
         } else {
             throw new Error(
-                `Input with name ${name} does not exist in this FormState instance.`
+                `Input with id ${id} does not exist in this FormState instance.`
             );
         }
     }
 
-    toggleInputChecked(name: string) {
-        const input = this.state.find(i => i.name === name);
+    toggleInputChecked(id: string) {
+        const input = this.state.find(i => i.id === id);
         if (!input)
             throw new Error(
-                `Input with name ${name} does not exist in this FormState instance.`
+                `Input with id ${id} does not exist in this FormState instance.`
             );
-        if (input.type !== InputType.Checkbox)
+        if (input.type !== InputType.Checkbox && input.type !== InputType.Radio)
             throw new Error(
-                `Input with name ${name} does not have type "checkbox".`
+                `To be able to toggle checked, input with id ${id} must be of type "checkbox" or "radio".`
             );
         input.toggleChecked();
         return input;
     }
 
-    touchInput(name: string) {
-        const input = this.state.find(i => i.name === name);
+    touchInput(id: string) {
+        const input = this.getInputIfValid(id);
+        input.blur();
+    }
+
+    selectRadioInput(id: string) {
+        const input = this.getInputIfValid(id);
+        if (input.type !== InputType.Radio)
+            throw new TypeError(`selectRadioInput only takes an Input of type "radio", received "${input.type}".`);
+        const siblingRadios = this.state.filter( i => i.name === input.name && i.id !== input.id);
+        if (input.checked === true ) return
+        else {
+            input.toggleChecked();
+            siblingRadios.find( i => i.checked === true )?.toggleChecked();
+        }
+    }
+
+    getInputIfValid(id: string) {
+        const input = this.state.find(i => i.id === id);
         if (!input)
             throw new Error(
-                `Input with name ${name} does not exist in this FormState instance.`
+                `Input with id "${id}" does not exist in this FormState instance's state.`
             );
-        input.blur();
+        return input;
     }
 }

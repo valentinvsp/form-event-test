@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { FormState, Input, InputOptions, InputType } from './ClassyClasses';
 
+// TODO -> Since we are using event delegation, the actual event being captured is on an Input target
+//         but TypeScript does not allow having (e: React.ChangeEvent<HTMLInputElement>) to be assigned
+//         to a <form> onChange prop. This leads to "value" and "type" as being typed 'any' instead of 'string'.
+//         Find a way to correctly type these.
 type hookReturn = [ Input[], (e: React.ChangeEvent<HTMLFormElement>) => void, (e: React.FocusEvent<HTMLFormElement>) => void, (arg0: Input[]) => void ];
 
 /**
@@ -28,17 +32,20 @@ export default function useFormState(inputData?: Input | Input[] | InputOptions[
 
     const handleOnChange = (e: React.ChangeEvent<HTMLFormElement>) => {
         const {
-            target: { name, value, type },
+            target: { id, value, type },
         } = e;
-        
+
         if (formRef.current) {
             if (type === InputType.Checkbox) {
-                formRef.current.toggleInputChecked(name);
+                formRef.current.toggleInputChecked(id);
                 e.stopPropagation();
                 // Warning! Preventing default on checkboxes will break the desired beahvior.
-            }
-            else {
-                formRef.current.setInputValue(name, value);
+            } else if (type === InputType.Radio) {
+                formRef.current.selectRadioInput(id);
+                e.stopPropagation();
+                // // Warning! Preventing default on checkboxes will break the desired beahvior.
+            } else {
+                formRef.current.setInputValue(id, value);
                 e.preventDefault();
             }
             setForm(formRef.current.getState());
@@ -46,14 +53,22 @@ export default function useFormState(inputData?: Input | Input[] | InputOptions[
     };
 
     const handleBlur = (e: React.FocusEvent<HTMLFormElement>) => {
-        console.log(`${e.target.name} blurred`)
         e.preventDefault();
+        if ( e.target.type === InputType.Radio) return;
         if (formRef.current) {
-            formRef.current.touchInput(e.target.name);
+            formRef.current.touchInput(e.target.id);
             setForm(formRef.current.getState());
         }
     }
 
     return [form, handleOnChange, handleBlur, createForm];
 }
+
+// TODO -> make this return a string
+// function getIdFromEvent(event: React.BaseSyntheticEvent<HTMLElement>) {
+//     let id: string = event.target.id;
+//     if (!id) throw new Error(`Element ${event.target} does not have an "id" property,
+//         which is required for the form to work properly.`)
+//     return id;
+// }
 
