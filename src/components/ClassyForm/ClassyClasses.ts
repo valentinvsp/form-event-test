@@ -65,6 +65,20 @@ export class Input implements InputOptions {
         this.touched = false;
         this.valid = this.isValid();
 
+        if ((this.minLength || this.minLength === 0) &&(
+                !(typeof this.minLength === 'number') || this.minLength <= 0 || !Number.isInteger(this.minLength)
+                )
+            ) throw new Error(`Input options with id ${this.id} has an invalid "minLength" property.
+            "minLength" should be an integer, greater or equal to 1.`);
+            
+        if ((this.maxLength || this.maxLength === 0) && (
+                !(typeof this.maxLength === 'number') || this.maxLength <= 0 || !Number.isInteger(this.minLength)
+                || (this.minLength && this.minLength > this.maxLength)
+                )
+            ) throw new Error(`Input options with id ${this.id} has an invalid "maxLength" property.
+            "maxLength" should be an integer, greater or equal to 1. If a "minLength property is set,
+             it should be greater or equal to it.`);
+
         if (
             (this.type === InputType.Checkbox ||
             this.type === InputType.Radio) &&
@@ -92,6 +106,8 @@ export class Input implements InputOptions {
     // TODO -> Handle validit checks for checkboxes (if required) and radios (if none is selected and one should be)
     isValid() {
         if (this.required && !this.value) return false;
+        if (this.minLength && typeof this.value === 'string' && this.minLength > this.value.length) return false;
+        if (this.maxLength && typeof this.value === 'string' && this.maxLength < this.value.length) return false;
         if (this.regex)
             if (typeof this.value !== 'string')
                 throw new TypeError(

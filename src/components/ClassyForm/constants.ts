@@ -6,7 +6,9 @@ export const inputData: InputOptions[] = [
         name: 'username',
         type: InputType.Text,
         label: 'Enter Username:',
-        required: true
+        required: true,
+        minLength: 3,
+        maxLength: 10,
     },
     {
         id: 'email',
@@ -20,7 +22,10 @@ export const inputData: InputOptions[] = [
         name: 'password',
         type: InputType.Password,
         label: 'Enter Password:',
-        required: true
+        required: true,
+        regex: /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).*$/
+        // above regexp should match a password containing at least
+        // 1 uppercase letter, 1 lowercase letter, 1 digit and 1 special character
     },
     {
         id: 'hungry',
