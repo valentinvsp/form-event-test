@@ -215,12 +215,12 @@ export class FormState {
     }
 
     touchInput(id: string) {
-        const input = this.getInputIfValid(id);
+        const input = this.getInputById(id);
         input.blur();
     }
 
     selectRadioInput(id: string) {
-        const input = this.getInputIfValid(id);
+        const input = this.getInputById(id);
         if (input.type !== InputType.Radio)
             throw new TypeError(`selectRadioInput only takes an Input of type "radio", received "${input.type}".`);
         const siblingRadios = this.state.filter( i => i.name === input.name && i.id !== input.id);
@@ -231,7 +231,7 @@ export class FormState {
         }
     }
 
-    getInputIfValid(id: string) {
+    getInputById(id: string) {
         const input = this.state.find(i => i.id === id);
         if (!input)
             throw new Error(
@@ -239,4 +239,14 @@ export class FormState {
             );
         return input;
     }
+
+    isValid() {
+        const valid =  !this.state.some( input => !input.isValid());
+        if (valid) return true
+        else {
+            this.state.forEach( input => input.blur());
+            return false;
+        }
+    }
+
 }

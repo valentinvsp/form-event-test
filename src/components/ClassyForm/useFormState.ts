@@ -9,7 +9,7 @@ import { FormState, Input, InputOptions, InputType } from './ClassyClasses';
 //         but TypeScript does not allow having (e: React.ChangeEvent<HTMLInputElement>) to be assigned
 //         to a <form> onChange prop. This leads to "value" and "type" as being typed 'any' instead of 'string'.
 //         Find a way to correctly type these.
-type hookReturn = [ Input[], (e: React.ChangeEvent<HTMLFormElement>) => void, (e: React.FocusEvent<HTMLFormElement>) => void, (arg0: Input[]) => void ];
+type hookReturn = [ Input[], (e: React.ChangeEvent<HTMLFormElement>) => void, (e: React.FocusEvent<HTMLFormElement>) => void, () => boolean, (arg0: Input[]) => void ];
 
 /**
  * Takes information about the inputs you want in your form, and manages all the
@@ -18,7 +18,7 @@ type hookReturn = [ Input[], (e: React.ChangeEvent<HTMLFormElement>) => void, (e
  * @param inputData is the information needed to create a form. It can be of
  * type Input, Input[], InputOptions[] or an Array with a mix of Input and InputOptions.
  * 
- * @returns a tuple containing [ state, onChangeHandler, onBlurHandler, createNewStateObject ]
+ * @returns a tuple containing [ state, onChangeHandler, onBlurHandler, isFormValid, createNewStateObject ]
  */
 export default function useFormState(inputData?: Input | Input[] | InputOptions[]): hookReturn {
     const [form, setForm] = useState<Input[]>([]);
@@ -66,7 +66,16 @@ export default function useFormState(inputData?: Input | Input[] | InputOptions[
         }
     }
 
-    return [form, handleOnChange, handleBlur, createForm];
+    const isFormValid = () => {
+        if (formRef.current) {
+            const valid =  formRef.current.isValid();
+            setForm(formRef.current.getState());
+            return valid;
+        }
+        else throw new Error('Cannot validate an uninitialized form.');
+    }
+
+    return [form, handleOnChange, handleBlur, isFormValid, createForm];
 }
 
 // TODO -> make this return a string

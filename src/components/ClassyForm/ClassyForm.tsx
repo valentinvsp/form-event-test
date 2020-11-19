@@ -4,12 +4,14 @@ import useFormState from './useFormState';
 import { inputData } from './constants';
 
 const ClassyForm: React.FC = () => {
-    const [formData, handleFormOnChange, handleFormBlur ] = useFormState(inputData);
+    const [formData, handleFormOnChange, handleFormBlur, formIsValid ] = useFormState(inputData);
     // const renderCount = useRef(0);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log('submitted');
+        if ( formIsValid()) console.log('all good here!');
+        else console.log('check your inputs');
     };
 
     // TODO find out why counter increments by 2;
