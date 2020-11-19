@@ -4,7 +4,7 @@ import useFormState from './useFormState';
 import { inputData } from './constants';
 
 const ClassyForm: React.FC = () => {
-    const [formData, updateFormData, handleFormBlur ] = useFormState(inputData);
+    const [formData, handleFormOnChange, handleFormBlur ] = useFormState(inputData);
     // const renderCount = useRef(0);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -12,10 +12,11 @@ const ClassyForm: React.FC = () => {
         console.log('submitted');
     };
 
+    // TODO find out why counter increments by 2;
     // renderCount.current = renderCount.current + 1;
     // console.log(`render number ${renderCount.current}`);
     return (
-        <form onChange={updateFormData} onBlur={handleFormBlur} onSubmit={handleSubmit} noValidate>
+        <form onChange={handleFormOnChange} onBlur={handleFormBlur} onSubmit={handleSubmit} noValidate>
             {formData?.map(({ id, name, type, value, checked, label, validationError, touched, valid }) => {
                 if (
                     type === InputType.Text ||
