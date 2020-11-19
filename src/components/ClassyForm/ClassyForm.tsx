@@ -51,6 +51,7 @@ const ClassyForm: React.FC = () => {
                     return (
                         <div key={id} className="form-group">
                         <input
+                            id={id}
                             type="submit"
                             className="btn btn-primary mt-3"
                             value={value}
@@ -70,9 +71,14 @@ const ClassyForm: React.FC = () => {
                             <label className="form-check-label" htmlFor={name}>
                                 {label}
                             </label>
+                            {touched && !valid && <small
+                                className="form-text input-error"
+                            >
+                                {validationError}
+                            </small>}
                         </div>
                     );
-                    if (type === InputType.Radio)
+                if (type === InputType.Radio)
                     return (
                         <div key={id} className="form-check form-check-inline">
                             <input

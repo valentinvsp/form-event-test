@@ -36,7 +36,8 @@ export const inputData: InputOptions[] = [
         type: InputType.Checkbox,
         value: 'thirsty',
         checked: false,
-        label: 'Are you thirsty?'
+        label: 'Are you thirsty?',
+        required: true,
     },
     {
         id: 'slowspeed',
@@ -44,6 +45,7 @@ export const inputData: InputOptions[] = [
         type: InputType.Radio,
         value: 'slow',
         label: 'Slow',
+        checked: true
     },
     {
         id: 'fastspeed',
@@ -51,7 +53,7 @@ export const inputData: InputOptions[] = [
         type: InputType.Radio,
         value: 'faster',
         label: 'Faster',
-
+        checked: true
     },
     {
         id: 'fasterspeed',

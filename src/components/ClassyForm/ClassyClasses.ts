@@ -66,7 +66,8 @@ export class Input implements InputOptions {
         this.valid = this.isValid();
 
         if (
-            this.type === InputType.Checkbox &&
+            (this.type === InputType.Checkbox ||
+            this.type === InputType.Radio) &&
             typeof this.checked === 'undefined'
         )
             this.checked = false;
@@ -88,6 +89,7 @@ export class Input implements InputOptions {
         );
     }
 
+    // TODO -> Handle validit checks for checkboxes (if required) and radios (if none is selected and one should be)
     isValid() {
         if (this.required && !this.value) return false;
         if (this.regex)
@@ -97,6 +99,7 @@ export class Input implements InputOptions {
                      and a value of type ${typeof this.value}. Expected type "string".`
                 );
             else if (this.value.match(this.regex) === null) return false;
+        if (this.required && this.type === InputType.Checkbox) return this.checked ? true : false;
         return true;
     }
 
@@ -107,6 +110,7 @@ export class Input implements InputOptions {
 
     toggleChecked() {
         this.checked = !this.checked;
+        this.valid = this.isValid();
     }
 
     blur() {
@@ -147,7 +151,9 @@ export class FormState {
             );
         }
         if (input.type === InputType.Radio) {
-            input.checked = this.state.some(i => i.name === input.name) ? false : true;
+            if (input.checked) 
+                this.state.filter( i => i.name === input.name)
+                .forEach( i => { if (i.checked) i.toggleChecked() })
         }
         this.state.push(input);
     }

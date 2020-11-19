@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { FormState, Input, InputOptions, InputType } from './ClassyClasses';
 
+// TODO -> there is an issue with clicking away from a text input and onto a checkbox
+//         that the onblur event triggers and works properly, but the checkbox does not get toggled.
+//         it seems to only occur when validation fails and the validationError is displayed
+
 // TODO -> Since we are using event delegation, the actual event being captured is on an Input target
 //         but TypeScript does not allow having (e: React.ChangeEvent<HTMLInputElement>) to be assigned
 //         to a <form> onChange prop. This leads to "value" and "type" as being typed 'any' instead of 'string'.
@@ -54,7 +58,8 @@ export default function useFormState(inputData?: Input | Input[] | InputOptions[
 
     const handleBlur = (e: React.FocusEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if ( e.target.type === InputType.Radio) return;
+        const type = e.target.type;
+        if ( type === InputType.Radio || type === InputType.Button ) return;
         if (formRef.current) {
             formRef.current.touchInput(e.target.id);
             setForm(formRef.current.getState());
@@ -71,4 +76,5 @@ export default function useFormState(inputData?: Input | Input[] | InputOptions[
 //         which is required for the form to work properly.`)
 //     return id;
 // }
+// The current inssue is with event type (TypesScript).
 
