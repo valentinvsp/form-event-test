@@ -18,15 +18,11 @@ export type FieldType = InputType | SelectType;
 export type InputValue = string | number;
 
 export type InputAttributes = {
-    name?: string;
     type: InputType;
     placeholder?: string;
-    required?: boolean;
     minLength?: number;
     maxLength?: number;
-    validationError?: string;
     regex?: RegExp;
-    label?: string;
     checked?: boolean;
 }
 
@@ -38,22 +34,18 @@ export interface SelectAttributes {
 export type FieldAttributes = (InputAttributes | SelectAttributes) & BaseFieldAttributes;
 
 export type InputFieldAttributes = InputAttributes & BaseFieldAttributes;
+export type SelectFieldAttributes = SelectAttributes & BaseFieldAttributes;
 
-export class Input extends BaseField implements InputAttributes {
-    name?: string;
+export class InputField extends BaseField implements InputAttributes {
     type: InputType;
     placeholder?: string;
-    required?: boolean;
     minLength?: number;
     maxLength?: number;
-    valid: boolean;
-    validationError?: string;
     regex?: RegExp;
-    label?: string;
     checked?: boolean;
 
-    constructor(options: InputAttributes & BaseFieldAttributes) {
-        super(options);
+    constructor(attributes: InputAttributes & BaseFieldAttributes) {
+        super(attributes);
         ({
             id: this.id,
             name: this.name,
@@ -65,9 +57,9 @@ export class Input extends BaseField implements InputAttributes {
             regex: this.regex,
             label: this.label,
             checked: this.checked,
-        } = options);
+        } = attributes);
 
-        const { value, validationError } = options;
+        const { value, validationError } = attributes;
         this.value = value ? value : '';
         this.validationError = validationError ? validationError : 'Field is not valid.';
         
@@ -76,14 +68,14 @@ export class Input extends BaseField implements InputAttributes {
         if ((this.minLength || this.minLength === 0) &&(
                 !(typeof this.minLength === 'number') || this.minLength <= 0 || !Number.isInteger(this.minLength)
                 )
-            ) throw new Error(`Input options with id ${this.id} has an invalid "minLength" property.
+            ) throw new Error(`InputAttributes object containing id ${this.id} has an invalid "minLength" property.
             "minLength" should be an integer, greater or equal to 1.`);
             
         if ((this.maxLength || this.maxLength === 0) && (
                 !(typeof this.maxLength === 'number') || this.maxLength <= 0 || !Number.isInteger(this.minLength)
                 || (this.minLength && this.minLength > this.maxLength)
                 )
-            ) throw new Error(`Input options with id ${this.id} has an invalid "maxLength" property.
+            ) throw new Error(`InputAttributes object containing id ${this.id} has an invalid "maxLength" property.
             "maxLength" should be an integer, greater or equal to 1. If a "minLength property is set,
              it should be greater or equal to it.`);
 
@@ -102,11 +94,11 @@ export class Input extends BaseField implements InputAttributes {
                 )
             )
                 throw new Error(
-                    `Input ${this.id} is assigned a RegExp validator,
-                    but is not of an allowed type. Allowed types are "text", "email" and "password".`
+                    `InputAttributes object containing id ${this.id} has a "regex" property,
+                    but is not of an allowed "type" property. Allowed types are "text", "email" and "password".`
                 );
         if (this.type === InputType.Radio && typeof this.name === 'undefined') throw new Error(
-            `Input ${this.id} is of type "radio", but is not assigned a "name" property.
+            `InputAttributes object containing id ${this.id} has a "type" property of "radio", but is not assigned a "name" property.
             Radio buttons need a "name" property to work properly.`
         );
     }
@@ -120,7 +112,7 @@ export class Input extends BaseField implements InputAttributes {
         if (this.regex)
             if (typeof this.value !== 'string')
                 throw new TypeError(
-                    `Input ${this.id} has a RegExp validator
+                    `InputField ${this.id} has a RegExp validator
                      and a value of type ${typeof this.value}. Expected type "string".`
                 );
             else if (this.value.match(this.regex) === null) return false;
@@ -139,22 +131,22 @@ export class Input extends BaseField implements InputAttributes {
         this.checked = !this.checked;
         if (this.type !== InputType.Radio) this.valid = this.isValid();
     }
-
-    blur() {
-        this.touched = true;
-    }
 }
 
-export class Select extends BaseField implements SelectAttributes  {
+export class SelectField extends BaseField implements SelectAttributes  {
     type: SelectType;
     options: string[];
-    constructor(options: SelectAttributes & BaseFieldAttributes) {
-        super(options);
-        ({ type: this.type,  options: this.options } = options);
+    constructor(attributes: SelectAttributes & BaseFieldAttributes) {
+        super(attributes);
+        ({ type: this.type,  options: this.options } = attributes);
+
+        if (this.options.length < 1) throw new Error(`SelectField attributes containing id ${this.id} has no options.
+            It must have at least 1 option!`)
+        this.value = this.options[0]
     }
 }
 export class FormState {
-    state: Input[] = [];
+    state: (InputField | SelectField)[] = [];
 
     constructor(fields?: FieldAttributes[]) {
         if (typeof fields === 'undefined') return;
@@ -164,29 +156,30 @@ export class FormState {
                 // WARNING! The below statement contains a "hacky workawround" using "as".
                 // TODO -> find a better solution
                 if (Object.values(InputType).includes(field.type as InputType)) { 
-                    this.addInput(new Input(field as InputFieldAttributes));
+                    this.addField(new InputField(field as InputFieldAttributes));
+                }
+                if (Object.values(SelectType).includes(field.type as SelectType)) { 
+                    this.addField(new SelectField(field as SelectFieldAttributes));
                 }
             })
             return;
         }
         throw new TypeError(`FormState constructor takes one argument, which can be
-         of type Input, Input[], InputOptions[], or an Array containing a mix of Input and InputOptions.
+         of type InputField, InputField[], InputOptions[], or an Array containing a mix of InputField and InputOptions.
          Received argument: ${fields}`);
     }
 
-    addInput(input: Input) {
-        if (!(input instanceof Input)) throw new TypeError(`${input} must be an instance of Input.`)
-        if (this.state.some(i => i.id === input.id)) {
+    addField( field: InputField | SelectField) {
+        if (this.state.some(f => f.id === field.id)) {
             throw new TypeError(
-                `Input with id ${input.id} already exists in the form! Ids must be unique strings.`
+                `Field with id ${field.id} already exists in the form! Ids must be unique strings.`
             );
         }
-        if (input.type === InputType.Radio) {
-            if (input.checked) 
-                this.state.filter( i => i.name === input.name)
-                .forEach( i => { if (i.checked) i.toggleChecked() })
+        if (field.type === InputType.Radio && field.checked) {
+            const radioSiblings = this.state.filter( f => f.name === field.name) as InputField[];
+            radioSiblings.forEach( f => { if (f.checked) f.toggleChecked() })
         }
-        this.state.push(input);
+        this.state.push(field);
     }
 
     removeInputById(id: string) {
@@ -205,13 +198,12 @@ export class FormState {
 
     setInputValue(id: string, value: InputValue) {
         const input = this.state.find(i => i.id === id);
-        if (input) {
+        if (!input) throw new Error(`InputField with id ${id} does not exist in this FormState instance.`);
+        if (input instanceof InputField) {
             input.setValueAndValidate(value);
             return input;
         } else {
-            throw new Error(
-                `Input with id ${id} does not exist in this FormState instance.`
-            );
+            throw new Error(`Field with id ${id} is not an instance of InputField.`);
         }
     }
 
@@ -219,7 +211,7 @@ export class FormState {
         const input = this.state.find(i => i.id === id);
         if (!input)
             throw new Error(
-                `Input with id ${id} does not exist in this FormState instance.`
+                `InputField with id ${id} does not exist in this FormState instance.`
             );
         if (input.type !== InputType.Checkbox && input.type !== InputType.Radio)
             throw new Error(
@@ -237,8 +229,8 @@ export class FormState {
     selectRadioInput(id: string) {
         const input = this.getInputById(id);
         if (input.type !== InputType.Radio)
-            throw new TypeError(`selectRadioInput only takes an Input of type "radio", received "${input.type}".`);
-        const siblingRadios = this.state.filter( i => i.name === input.name && i.id !== input.id);
+            throw new TypeError(`selectRadioInput only takes an InputField of type "radio", received "${input.type}".`);
+        const siblingRadios = this.state.filter( i => i.name === input.name && i.id !== input.id) as InputField[];
         if (input.checked === true ) return
         else {
             input.toggleChecked();
@@ -250,8 +242,9 @@ export class FormState {
         const input = this.state.find(i => i.id === id);
         if (!input)
             throw new Error(
-                `Input with id "${id}" does not exist in this FormState instance's state.`
+                `InputField with id "${id}" does not exist in this FormState instance's state.`
             );
+        if (!(input instanceof InputField)) throw new Error(`Field with id ${id} is not an instance of InputField.`)
         return input;
     }
 
@@ -269,9 +262,9 @@ export class FormState {
         const radios = this.state.filter(i => i.type === InputType.Radio);
         let valid = true;
         radios.forEach( i => {
-            if (i.type !== InputType.Radio) throw new Error(`Input with id ${i.id} is not of type "radio", and cannot be used in the validateRadios function.`);
+            if (i.type !== InputType.Radio) throw new Error(`InputField with id ${i.id} is not of type "radio", and cannot be used in the validateRadios function.`);
             if (i.required === true) {
-                const siblings = radios.filter( r => r.name === i.name);
+                const siblings = radios.filter( r => r.name === i.name) as InputField[];
                 valid = siblings.some( r => r.checked === true);
                 siblings.forEach( r => r.valid = valid);    
             }

@@ -1,4 +1,4 @@
-import { FieldAttributes, InputType } from './ClassyClasses';
+import { FieldAttributes, InputType, SelectType } from './ClassyClasses';
 
 export const formFieldsData: FieldAttributes[] = [
     {
@@ -9,7 +9,8 @@ export const formFieldsData: FieldAttributes[] = [
         required: true,
         minLength: 3,
         maxLength: 10,
-        validationError: 'Username must be at least 3 characters long and at maximum 10.'
+        validationError: 'Username must be at least 3 characters long and at maximum 10.',
+        placeholder: 'your name that you use'
     },
     {
         id: 'email',
@@ -72,6 +73,15 @@ export const formFieldsData: FieldAttributes[] = [
         value: 'fastest',
         label: 'Fastest',
         required: true,
+    },
+    {
+        id: 'annoyance',
+        name: 'annoyance',
+        type: SelectType.Select,
+        value: '',
+        label: 'How annoyed are you?',
+        required: true,
+        options: ['some, not much', 'fairly annoyed', 'a lot, like really', 'leave me the F$%^ alone!'],
     },
     {
         id: 'submit',

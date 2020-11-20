@@ -1,5 +1,5 @@
 import React, { /* useRef */ } from 'react';
-import { InputType } from './ClassyClasses';
+import { InputField, InputType, SelectField } from './ClassyClasses';
 import useFormState from './useFormState';
 import { formFieldsData } from './constants';
 import './ClassyForm.css';
@@ -20,90 +20,106 @@ const ClassyForm: React.FC = () => {
     // console.log(`render number ${renderCount.current}`);
     return (
         <form onChange={handleFormOnChange} onBlur={handleFormBlur} onSubmit={handleSubmit} noValidate>
-            {formData?.map(({ id, name, type, value, checked, label, validationError, touched, valid }) => {
-                if (
-                    type === InputType.Text ||
-                    type === InputType.Email ||
-                    type === InputType.Password
-                )
-                    return (
-                        <div className="form-group" key={id}>
-                            {label && <label htmlFor={name}>{label}</label>}
+            {formData?.map( field => {
+                if (field instanceof InputField) {
+                    const { id, name, type, value, checked, label, validationError, touched, valid, placeholder } = field;
+                    if (
+                        type === InputType.Text ||
+                        type === InputType.Email ||
+                        type === InputType.Password
+                    )
+                        return (
+                            <div className="form-group" key={id}>
+                                {label && <label htmlFor={name}>{label}</label>}
+                                <input
+                                    id={id}
+                                    type={type}
+                                    className="form-control"
+                                    name={name}
+                                    value={value}
+                                    aria-describedby="emailHelp"
+                                    placeholder={placeholder}
+                                />
+                                <small
+                                    id="emailHelp"
+                                    className="form-text text-muted"
+                                >
+                                    We'll never share your email with anyone else.
+                                </small>
+                                {touched && !valid && <small
+                                    className="form-text input-error validation-error"
+                                >
+                                    {validationError}
+                                </small>}
+                            </div>
+                        );
+                    if (type === InputType.Button)
+                        return (
+                            <div key={id} className="form-group">
                             <input
                                 id={id}
-                                type={type}
-                                className="form-control"
-                                name={name}
-                                value={value}
-                                aria-describedby="emailHelp"
-                            />
-                            <small
-                                id="emailHelp"
-                                className="form-text text-muted"
-                            >
-                                We'll never share your email with anyone else.
-                            </small>
-                            {touched && !valid && <small
-                                className="form-text input-error validation-error"
-                            >
-                                {validationError}
-                            </small>}
-                        </div>
-                    );
-                if (type === InputType.Button)
-                    return (
-                        <div key={id} className="form-group">
-                        <input
-                            id={id}
-                            type="submit"
-                            className="btn btn-primary mt-3"
-                            value={value}
-                        />
-                        </div>
-                    );
-                if (type === InputType.Checkbox)
-                    return (
-                        <div key={id} className="form-group form-check">
-                            <input
-                                type={type}
-                                className="form-check-input"
-                                id={id}
-                                name={name}
-                                checked={checked}
-                            />
-                            <label className="form-check-label" htmlFor={name}>
-                                {label}
-                            </label>
-                            {touched && !valid && <small
-                                className="form-text input-error validation-error"
-                            >
-                                {validationError}
-                            </small>}
-                        </div>
-                    );
-                if (type === InputType.Radio)
-                    return (
-                        <div key={id} className="form-check form-check-inline">
-                            <input
-                                type={type}
-                                className="form-check-input"
-                                id={id}
-                                name={name}
-                                checked={checked}
+                                type="submit"
+                                className="btn btn-primary mt-3"
                                 value={value}
                             />
-                            <label className="form-check-label" htmlFor={name}>
-                                {label}
-                            </label>
-                            {touched && !valid && <small
-                                className="form-text input-error validation-error"
-                            >
-                                {validationError}
-                            </small>}
-                        </div>                
-                    );
+                            </div>
+                        );
+                    if (type === InputType.Checkbox)
+                        return (
+                            <div key={id} className="form-group form-check">
+                                <input
+                                    type={type}
+                                    className="form-check-input"
+                                    id={id}
+                                    name={name}
+                                    checked={checked}
+                                />
+                                <label className="form-check-label" htmlFor={name}>
+                                    {label}
+                                </label>
+                                {touched && !valid && <small
+                                    className="form-text input-error validation-error"
+                                >
+                                    {validationError}
+                                </small>}
+                            </div>
+                        );
+                    if (type === InputType.Radio)
+                        return (
+                            <div key={id} className="form-check form-check-inline">
+                                <input
+                                    type={type}
+                                    className="form-check-input"
+                                    id={id}
+                                    name={name}
+                                    checked={checked}
+                                    value={value}
+                                />
+                                <label className="form-check-label" htmlFor={name}>
+                                    {label}
+                                </label>
+                                {touched && !valid && <small
+                                    className="form-text input-error validation-error"
+                                >
+                                    {validationError}
+                                </small>}
+                            </div>                
+                        );
+                }
+                if (field instanceof SelectField) {
+                    const { id, options, label } = field;
+                    return (
+                        <div className="form-group">
+                            <label htmlFor="exampleFormControlSelect1">{label}</label>
+                            <select className="form-control" id={id}>
+                                {options.map( o => <option key={o}>{o}</option>)}
+                            </select>
+                        </div>
+                    )
+                }
                 return <div key={666}>Warning! Incorect input type.</div>;
-            })}
+            }
+            )}
         </form>
     );
 };

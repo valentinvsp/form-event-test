@@ -1,27 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
-import { FormState, Input, InputType, FieldAttributes } from './ClassyClasses';
+import { FormState, InputField, InputType, FieldAttributes, SelectField } from './ClassyClasses';
 
 // TODO -> there is an issue with clicking away from a text input and onto a checkbox
 //         that the onblur event triggers and works properly, but the checkbox does not get toggled.
 //         it seems to only occur when validation fails and the validationError is displayed
 
-// TODO -> Since we are using event delegation, the actual event being captured is on an Input target
+// TODO -> Since we are using event delegation, the actual event being captured is on an InputField target
 //         but TypeScript does not allow having (e: React.ChangeEvent<HTMLInputElement>) to be assigned
 //         to a <form> onChange prop. This leads to "value" and "type" as being typed 'any' instead of 'string'.
 //         Find a way to correctly type these.
-type hookReturn = [ Input[], (e: React.ChangeEvent<HTMLFormElement>) => void, (e: React.FocusEvent<HTMLFormElement>) => void, () => boolean, (arg0: Input[]) => void ];
+type hookReturn = [ (InputField | SelectField)[], (e: React.ChangeEvent<HTMLFormElement>) => void, (e: React.FocusEvent<HTMLFormElement>) => void, () => boolean, (arg0: InputField[]) => void ];
 
 /**
  * Takes information about the inputs you want in your form, and manages all the
  * state changes internally.
  * 
  * @param formFieldsData is the information needed to create a form. It can be of
- * type Input, Input[], InputAttributes[] or an Array with a mix of Input and InputAttributes.
+ * type InputField, InputField[], InputAttributes[] or an Array with a mix of InputField and InputAttributes.
  * 
  * @returns a tuple containing [ state, onChangeHandler(), onBlurHandler(), isFormValid(), createNewStateObject() ]
  */
 export default function useFormState(formFieldsData?: FieldAttributes[]): hookReturn {
-    const [form, setForm] = useState<Input[]>([]);
+    const [form, setForm] = useState<(InputField | SelectField)[]>([]);
     const formRef = useRef<FormState>()
 
     useEffect(() => {
