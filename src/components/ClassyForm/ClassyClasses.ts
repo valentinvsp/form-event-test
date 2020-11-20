@@ -4,7 +4,8 @@ export enum InputType {
     Password = 'password',
     Button = 'button',
     Checkbox = 'checkbox',
-    Radio = 'radio'
+    Radio = 'radio',
+    Select = 'select'
 }
 
 export type InputValue = string | number;
@@ -63,7 +64,8 @@ export class Input implements InputOptions {
         this.validationError = validationError ? validationError : 'Field is not valid.';
 
         this.touched = false;
-        this.valid = this.isValid();
+        
+        this.valid = this.type === InputType.Radio ? true : this.isValid();
 
         if ((this.minLength || this.minLength === 0) &&(
                 !(typeof this.minLength === 'number') || this.minLength <= 0 || !Number.isInteger(this.minLength)
@@ -105,7 +107,8 @@ export class Input implements InputOptions {
 
     // TODO -> Handle validit checks for checkboxes (if required) and radios (if none is selected and one should be)
     isValid() {
-        if (this.required && !this.value) return false;
+        if ((this.type === InputType.Text || this.type === InputType.Email || this.type === InputType.Password) && this.required && !this.value)
+            return false;
         if (this.minLength && typeof this.value === 'string' && this.minLength > this.value.length) return false;
         if (this.maxLength && typeof this.value === 'string' && this.maxLength < this.value.length) return false;
         if (this.regex)
@@ -116,6 +119,8 @@ export class Input implements InputOptions {
                 );
             else if (this.value.match(this.regex) === null) return false;
         if (this.required && this.type === InputType.Checkbox) return this.checked ? true : false;
+        if (this.type === InputType.Radio)
+            throw new Error(`Cannot validate input with id ${this.id} on it's own. Radio inputs are validated as group inside of the FormData class instance.`)
         return true;
     }
 
@@ -126,7 +131,7 @@ export class Input implements InputOptions {
 
     toggleChecked() {
         this.checked = !this.checked;
-        this.valid = this.isValid();
+        if (this.type !== InputType.Radio) this.valid = this.isValid();
     }
 
     blur() {
@@ -241,7 +246,8 @@ export class FormState {
     }
 
     isValid() {
-        const valid =  !this.state.some( input => !input.isValid());
+        const valid =  !this.state.some( input => input.type !== InputType.Radio && !input.isValid());
+        this.validateRadios();
         if (valid) return true
         else {
             this.state.forEach( input => input.blur());
@@ -249,4 +255,17 @@ export class FormState {
         }
     }
 
+    validateRadios() {
+        const radios = this.state.filter(i => i.type === InputType.Radio);
+        let valid = true;
+        radios.forEach( i => {
+            if (i.type !== InputType.Radio) throw new Error(`Input with id ${i.id} is not of type "radio", and cannot be used in the validateRadios function.`);
+            if (i.required === true) {
+                const siblings = radios.filter( r => r.name === i.name);
+                valid = siblings.some( r => r.checked === true);
+                siblings.forEach( r => r.valid = valid);    
+            }
+        });
+        return valid;
+    }
 }

@@ -38,21 +38,23 @@ export default function useFormState(inputData?: Input | Input[] | InputOptions[
         const {
             target: { id, value, type },
         } = e;
+        const form = formRef.current;
 
-        if (formRef.current) {
+        if (form) {
             if (type === InputType.Checkbox) {
-                formRef.current.toggleInputChecked(id);
+                form.toggleInputChecked(id);
                 e.stopPropagation();
                 // Warning! Preventing default on checkboxes will break the desired beahvior.
             } else if (type === InputType.Radio) {
-                formRef.current.selectRadioInput(id);
+                form.selectRadioInput(id);
+                form.validateRadios();
                 e.stopPropagation();
                 // // Warning! Preventing default on checkboxes will break the desired beahvior.
             } else {
-                formRef.current.setInputValue(id, value);
+                form.setInputValue(id, value);
                 e.preventDefault();
             }
-            setForm(formRef.current.getState());
+            setForm(form.getState());
         }    
     };
 

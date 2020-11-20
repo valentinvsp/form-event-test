@@ -2,6 +2,7 @@ import React, { /* useRef */ } from 'react';
 import { InputType } from './ClassyClasses';
 import useFormState from './useFormState';
 import { inputData } from './constants';
+import './ClassyForm.css';
 
 const ClassyForm: React.FC = () => {
     const [formData, handleFormOnChange, handleFormBlur, formIsValid ] = useFormState(inputData);
@@ -43,7 +44,7 @@ const ClassyForm: React.FC = () => {
                                 We'll never share your email with anyone else.
                             </small>
                             {touched && !valid && <small
-                                className="form-text input-error"
+                                className="form-text input-error validation-error"
                             >
                                 {validationError}
                             </small>}
@@ -74,7 +75,7 @@ const ClassyForm: React.FC = () => {
                                 {label}
                             </label>
                             {touched && !valid && <small
-                                className="form-text input-error"
+                                className="form-text input-error validation-error"
                             >
                                 {validationError}
                             </small>}
@@ -94,6 +95,11 @@ const ClassyForm: React.FC = () => {
                             <label className="form-check-label" htmlFor={name}>
                                 {label}
                             </label>
+                            {touched && !valid && <small
+                                className="form-text input-error validation-error"
+                            >
+                                {validationError}
+                            </small>}
                         </div>                
                     );
                 return <div key={666}>Warning! Incorect input type.</div>;

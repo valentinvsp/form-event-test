@@ -9,13 +9,16 @@ export const inputData: InputOptions[] = [
         required: true,
         minLength: 3,
         maxLength: 10,
+        validationError: 'Username must be at least 3 characters long and at maximum 10.'
     },
     {
         id: 'email',
         name: 'email',
         type: InputType.Email,
         label: 'Enter Email:',
-        required: true
+        required: true,
+        regex: /^[\w-.]+@([\w-]+\.)+[\w]{2,4}$/,
+        validationError: 'Please enter a valid email format.'
     },
     {
         id: 'password',
@@ -23,7 +26,8 @@ export const inputData: InputOptions[] = [
         type: InputType.Password,
         label: 'Enter Password:',
         required: true,
-        regex: /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).*$/
+        regex: /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).*$/,
+        validationError: 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 digit and 1 special character.'
         // above regexp should match a password containing at least
         // 1 uppercase letter, 1 lowercase letter, 1 digit and 1 special character
     },
@@ -50,7 +54,8 @@ export const inputData: InputOptions[] = [
         type: InputType.Radio,
         value: 'slow',
         label: 'Slow',
-        checked: true
+        // checked: true,
+        validationError: 'click us!'
     },
     {
         id: 'fastspeed',
@@ -58,7 +63,7 @@ export const inputData: InputOptions[] = [
         type: InputType.Radio,
         value: 'faster',
         label: 'Faster',
-        checked: true
+        // checked: true
     },
     {
         id: 'fasterspeed',
@@ -66,6 +71,7 @@ export const inputData: InputOptions[] = [
         type: InputType.Radio,
         value: 'fastest',
         label: 'Fastest',
+        required: true,
     },
     {
         id: 'submit',
