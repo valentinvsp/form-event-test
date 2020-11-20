@@ -15,21 +15,21 @@ type hookReturn = [ Input[], (e: React.ChangeEvent<HTMLFormElement>) => void, (e
  * Takes information about the inputs you want in your form, and manages all the
  * state changes internally.
  * 
- * @param inputData is the information needed to create a form. It can be of
+ * @param formFieldsData is the information needed to create a form. It can be of
  * type Input, Input[], InputOptions[] or an Array with a mix of Input and InputOptions.
  * 
- * @returns a tuple containing [ state, onChangeHandler, onBlurHandler, isFormValid, createNewStateObject ]
+ * @returns a tuple containing [ state, onChangeHandler(), onBlurHandler(), isFormValid(), createNewStateObject() ]
  */
-export default function useFormState(inputData?: Input | Input[] | InputOptions[]): hookReturn {
+export default function useFormState(formFieldsData?: Input | Input[] | InputOptions[]): hookReturn {
     const [form, setForm] = useState<Input[]>([]);
     const formRef = useRef<FormState>()
 
     useEffect(() => {
-        createForm(inputData)
-    }, [inputData])
+        createForm(formFieldsData)
+    }, [formFieldsData])
 
-    const createForm = (inputData?: Input | Input[] | InputOptions[]) => {
-        const createdForm = new FormState(inputData)
+    const createForm = (formFieldsData?: Input | Input[] | InputOptions[]) => {
+        const createdForm = new FormState(formFieldsData)
         setForm(createdForm.getState());
         formRef.current = createdForm;
     }

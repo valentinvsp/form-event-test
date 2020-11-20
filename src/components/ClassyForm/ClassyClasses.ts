@@ -5,8 +5,13 @@ export enum InputType {
     Button = 'button',
     Checkbox = 'checkbox',
     Radio = 'radio',
+}
+
+export enum SelectType {
     Select = 'select'
 }
+
+export type FieldType = InputType | SelectType;
 
 export type InputValue = string | number;
 
@@ -27,7 +32,15 @@ export interface InputOptions {
     checked?: boolean;
 }
 
-export type InputValidation = [number, string, boolean, string];
+export interface SelectOptions {
+    id: string;
+    name?: string;
+    type: SelectType;
+    value?: InputValue;
+    options: string[];
+}
+
+export type FieldOptions = InputOptions | SelectOptions;
 
 export class Input implements InputOptions {
     id: string;
@@ -136,6 +149,15 @@ export class Input implements InputOptions {
 
     blur() {
         this.touched = true;
+    }
+}
+
+export class Select implements SelectOptions {
+    id: string;
+    type: SelectType;
+    options: string[];
+    constructor(options: SelectOptions) {
+        ({ id: this.id, type: this.type,  options: this.options } = options);
     }
 }
 export class FormState {

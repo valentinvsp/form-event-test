@@ -1,6 +1,6 @@
 import { InputOptions, InputType } from './ClassyClasses';
 
-export const inputData: InputOptions[] = [
+export const formFieldsData: InputOptions[] = [
     {
         id: 'username',
         name: 'username',

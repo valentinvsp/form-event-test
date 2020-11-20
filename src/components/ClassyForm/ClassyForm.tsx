@@ -1,11 +1,11 @@
 import React, { /* useRef */ } from 'react';
 import { InputType } from './ClassyClasses';
 import useFormState from './useFormState';
-import { inputData } from './constants';
+import { formFieldsData } from './constants';
 import './ClassyForm.css';
 
 const ClassyForm: React.FC = () => {
-    const [formData, handleFormOnChange, handleFormBlur, formIsValid ] = useFormState(inputData);
+    const [formData, handleFormOnChange, handleFormBlur, formIsValid ] = useFormState(formFieldsData);
     // const renderCount = useRef(0);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
