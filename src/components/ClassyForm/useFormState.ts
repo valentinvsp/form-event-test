@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FormState, InputField, InputType, FieldAttributes, SelectField } from './ClassyClasses';
+import { FormState, InputField, InputType, FieldAttributes, Field, SelectType } from './ClassyClasses';
 
 // TODO -> there is an issue with clicking away from a text input and onto a checkbox
 //         that the onblur event triggers and works properly, but the checkbox does not get toggled.
@@ -9,7 +9,7 @@ import { FormState, InputField, InputType, FieldAttributes, SelectField } from '
 //         but TypeScript does not allow having (e: React.ChangeEvent<HTMLInputElement>) to be assigned
 //         to a <form> onChange prop. This leads to "value" and "type" as being typed 'any' instead of 'string'.
 //         Find a way to correctly type these.
-type hookReturn = [ (InputField | SelectField)[], (e: React.ChangeEvent<HTMLFormElement>) => void, (e: React.FocusEvent<HTMLFormElement>) => void, () => boolean, (arg0: InputField[]) => void ];
+type hookReturn = [ (Field)[], (e: React.ChangeEvent<HTMLFormElement>) => void, (e: React.FocusEvent<HTMLFormElement>) => void, () => boolean, (arg0: InputField[]) => void ];
 
 /**
  * Takes information about the inputs you want in your form, and manages all the
@@ -21,7 +21,7 @@ type hookReturn = [ (InputField | SelectField)[], (e: React.ChangeEvent<HTMLForm
  * @returns a tuple containing [ state, onChangeHandler(), onBlurHandler(), isFormValid(), createNewStateObject() ]
  */
 export default function useFormState(formFieldsData?: FieldAttributes[]): hookReturn {
-    const [form, setForm] = useState<(InputField | SelectField)[]>([]);
+    const [form, setForm] = useState<(Field)[]>([]);
     const formRef = useRef<FormState>()
 
     useEffect(() => {
@@ -39,6 +39,7 @@ export default function useFormState(formFieldsData?: FieldAttributes[]): hookRe
             target: { id, value, type },
         } = e;
         const form = formRef.current;
+        console.log(e);
 
         if (form) {
             if (type === InputType.Checkbox) {
@@ -49,9 +50,8 @@ export default function useFormState(formFieldsData?: FieldAttributes[]): hookRe
                 form.selectRadioInput(id);
                 form.validateRadios();
                 e.stopPropagation();
-                // // Warning! Preventing default on checkboxes will break the desired beahvior.
             } else {
-                form.setInputValue(id, value);
+                form.setFieldValue(id, value);
                 e.preventDefault();
             }
             setForm(form.getState());
@@ -62,6 +62,7 @@ export default function useFormState(formFieldsData?: FieldAttributes[]): hookRe
         e.preventDefault();
         const type = e.target.type;
         if ( type === InputType.Radio || type === InputType.Button ) return;
+        if ( type === SelectType.SelectOne ) return; // TODO -> temporary solution until proper validation is in place
         if (formRef.current) {
             formRef.current.touchInput(e.target.id);
             setForm(formRef.current.getState());

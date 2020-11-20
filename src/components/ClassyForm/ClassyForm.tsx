@@ -109,8 +109,8 @@ const ClassyForm: React.FC = () => {
                 if (field instanceof SelectField) {
                     const { id, options, label } = field;
                     return (
-                        <div className="form-group">
-                            <label htmlFor="exampleFormControlSelect1">{label}</label>
+                        <div className="form-group mt-3" key={id}>
+                            <label htmlFor={id}>{label}</label>
                             <select className="form-control" id={id}>
                                 {options.map( o => <option key={o}>{o}</option>)}
                             </select>

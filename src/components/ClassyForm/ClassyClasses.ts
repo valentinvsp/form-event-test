@@ -10,7 +10,7 @@ export enum InputType {
 }
 
 export enum SelectType {
-    Select = 'select'
+    SelectOne = 'select-one'
 }
 
 export type FieldType = InputType | SelectType;
@@ -35,6 +35,8 @@ export type FieldAttributes = (InputAttributes | SelectAttributes) & BaseFieldAt
 
 export type InputFieldAttributes = InputAttributes & BaseFieldAttributes;
 export type SelectFieldAttributes = SelectAttributes & BaseFieldAttributes;
+
+export type Field = InputField | SelectField;
 
 export class InputField extends BaseField implements InputAttributes {
     type: InputType;
@@ -141,12 +143,12 @@ export class SelectField extends BaseField implements SelectAttributes  {
         ({ type: this.type,  options: this.options } = attributes);
 
         if (this.options.length < 1) throw new Error(`SelectField attributes containing id ${this.id} has no options.
-            It must have at least 1 option!`)
-        this.value = this.options[0]
+            It must have at least 1 option!`);
+        this.value = this.options[0];
     }
 }
 export class FormState {
-    state: (InputField | SelectField)[] = [];
+    state: (Field)[] = [];
 
     constructor(fields?: FieldAttributes[]) {
         if (typeof fields === 'undefined') return;
@@ -169,7 +171,7 @@ export class FormState {
          Received argument: ${fields}`);
     }
 
-    addField( field: InputField | SelectField) {
+    addField( field: Field) {
         if (this.state.some(f => f.id === field.id)) {
             throw new TypeError(
                 `Field with id ${field.id} already exists in the form! Ids must be unique strings.`
@@ -196,12 +198,15 @@ export class FormState {
         return [...this.state];
     }
 
-    setInputValue(id: string, value: InputValue) {
-        const input = this.state.find(i => i.id === id);
-        if (!input) throw new Error(`InputField with id ${id} does not exist in this FormState instance.`);
-        if (input instanceof InputField) {
-            input.setValueAndValidate(value);
-            return input;
+    setFieldValue(id: string, value: InputValue) {
+        const field = this.state.find(f => f.id === id);
+        if (!field) throw new Error(`InputField with id ${id} does not exist in this FormState instance.`);
+        if (field instanceof InputField) {
+            field.setValueAndValidate(value);
+            return field;
+        } else if (field instanceof SelectField) {
+            if (typeof value !== 'string') throw new TypeError(`SelectField update value must be of type "string", found ${typeof value}`);
+            field.setValue(value);
         } else {
             throw new Error(`Field with id ${id} is not an instance of InputField.`);
         }

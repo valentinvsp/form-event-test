@@ -48,6 +48,7 @@ export const formFieldsData: FieldAttributes[] = [
         checked: false,
         label: 'Are you thirsty?',
         required: true,
+        validationError: 'You gotta tick this box!'
     },
     {
         id: 'slowspeed',
@@ -77,7 +78,7 @@ export const formFieldsData: FieldAttributes[] = [
     {
         id: 'annoyance',
         name: 'annoyance',
-        type: SelectType.Select,
+        type: SelectType.SelectOne,
         value: '',
         label: 'How annoyed are you?',
         required: true,

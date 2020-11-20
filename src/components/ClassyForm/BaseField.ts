@@ -34,4 +34,8 @@ export class BaseField implements BaseFieldAttributes {
     blur() {
         this.touched = true;
     }
+
+    setValue(value: string | number) {
+        this.value = value;
+    }
 }
