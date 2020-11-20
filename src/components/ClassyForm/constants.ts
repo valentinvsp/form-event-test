@@ -1,6 +1,6 @@
-import { InputOptions, InputType } from './ClassyClasses';
+import { FieldAttributes, InputType } from './ClassyClasses';
 
-export const formFieldsData: InputOptions[] = [
+export const formFieldsData: FieldAttributes[] = [
     {
         id: 'username',
         name: 'username',

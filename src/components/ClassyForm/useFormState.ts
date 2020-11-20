@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FormState, Input, InputOptions, InputType } from './ClassyClasses';
+import { FormState, Input, InputType, FieldAttributes } from './ClassyClasses';
 
 // TODO -> there is an issue with clicking away from a text input and onto a checkbox
 //         that the onblur event triggers and works properly, but the checkbox does not get toggled.
@@ -16,11 +16,11 @@ type hookReturn = [ Input[], (e: React.ChangeEvent<HTMLFormElement>) => void, (e
  * state changes internally.
  * 
  * @param formFieldsData is the information needed to create a form. It can be of
- * type Input, Input[], InputOptions[] or an Array with a mix of Input and InputOptions.
+ * type Input, Input[], InputAttributes[] or an Array with a mix of Input and InputAttributes.
  * 
  * @returns a tuple containing [ state, onChangeHandler(), onBlurHandler(), isFormValid(), createNewStateObject() ]
  */
-export default function useFormState(formFieldsData?: Input | Input[] | InputOptions[]): hookReturn {
+export default function useFormState(formFieldsData?: FieldAttributes[]): hookReturn {
     const [form, setForm] = useState<Input[]>([]);
     const formRef = useRef<FormState>()
 
@@ -28,7 +28,7 @@ export default function useFormState(formFieldsData?: Input | Input[] | InputOpt
         createForm(formFieldsData)
     }, [formFieldsData])
 
-    const createForm = (formFieldsData?: Input | Input[] | InputOptions[]) => {
+    const createForm = (formFieldsData?: FieldAttributes[]) => {
         const createdForm = new FormState(formFieldsData)
         setForm(createdForm.getState());
         formRef.current = createdForm;

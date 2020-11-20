@@ -1,3 +1,5 @@
+import { BaseField, BaseFieldAttributes } from './BaseField'
+
 export enum InputType {
     Text = 'text',
     Email = 'email',
@@ -15,50 +17,43 @@ export type FieldType = InputType | SelectType;
 
 export type InputValue = string | number;
 
-export interface InputOptions {
-    id: string;
+export type InputAttributes = {
     name?: string;
     type: InputType;
-    value?: InputValue;
     placeholder?: string;
     required?: boolean;
     minLength?: number;
     maxLength?: number;
-    touched?: boolean;
-    valid?: boolean;
     validationError?: string;
     regex?: RegExp;
     label?: string;
     checked?: boolean;
 }
 
-export interface SelectOptions {
-    id: string;
-    name?: string;
+export interface SelectAttributes {
     type: SelectType;
-    value?: InputValue;
     options: string[];
 }
 
-export type FieldOptions = InputOptions | SelectOptions;
+export type FieldAttributes = (InputAttributes | SelectAttributes) & BaseFieldAttributes;
 
-export class Input implements InputOptions {
-    id: string;
+export type InputFieldAttributes = InputAttributes & BaseFieldAttributes;
+
+export class Input extends BaseField implements InputAttributes {
     name?: string;
     type: InputType;
-    value: InputValue;
     placeholder?: string;
     required?: boolean;
     minLength?: number;
     maxLength?: number;
-    touched: boolean;
     valid: boolean;
     validationError?: string;
     regex?: RegExp;
     label?: string;
     checked?: boolean;
 
-    constructor(options: InputOptions) {
+    constructor(options: InputAttributes & BaseFieldAttributes) {
+        super(options);
         ({
             id: this.id,
             name: this.name,
@@ -75,8 +70,6 @@ export class Input implements InputOptions {
         const { value, validationError } = options;
         this.value = value ? value : '';
         this.validationError = validationError ? validationError : 'Field is not valid.';
-
-        this.touched = false;
         
         this.valid = this.type === InputType.Radio ? true : this.isValid();
 
@@ -152,38 +145,33 @@ export class Input implements InputOptions {
     }
 }
 
-export class Select implements SelectOptions {
-    id: string;
+export class Select extends BaseField implements SelectAttributes  {
     type: SelectType;
     options: string[];
-    constructor(options: SelectOptions) {
-        ({ id: this.id, type: this.type,  options: this.options } = options);
+    constructor(options: SelectAttributes & BaseFieldAttributes) {
+        super(options);
+        ({ type: this.type,  options: this.options } = options);
     }
 }
 export class FormState {
     state: Input[] = [];
 
-    constructor(input?: Input | Input[] | InputOptions[]) {
-        if (typeof input === 'undefined') return;
-        if (input instanceof Array && input.length === 0) return;
-        if (input instanceof Input) {
-            this.addInput(input);
-            return;
-        }
-        if (input instanceof Array && input.length > 0) {
-            input.forEach( el => {
-                if (el instanceof Input) {
-                    this.addInput(el);
-                }
-                else {
-                    this.addInput(new Input(el));
+    constructor(fields?: FieldAttributes[]) {
+        if (typeof fields === 'undefined') return;
+        if (fields instanceof Array && fields.length === 0) return;
+        if (fields instanceof Array && fields.length > 0) {
+            fields.forEach( field => {
+                // WARNING! The below statement contains a "hacky workawround" using "as".
+                // TODO -> find a better solution
+                if (Object.values(InputType).includes(field.type as InputType)) { 
+                    this.addInput(new Input(field as InputFieldAttributes));
                 }
             })
             return;
         }
         throw new TypeError(`FormState constructor takes one argument, which can be
          of type Input, Input[], InputOptions[], or an Array containing a mix of Input and InputOptions.
-         Received argument: ${input}`);
+         Received argument: ${fields}`);
     }
 
     addInput(input: Input) {
