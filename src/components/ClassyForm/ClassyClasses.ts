@@ -147,10 +147,23 @@ export class SelectField extends BaseField implements SelectAttributes  {
         this.value = this.options[0];
     }
 }
-export class FormState {
-    state: (Field)[] = [];
+
+export type FormState = {
+    fieldsArray: Field[];
+    fieldsObject: {
+        [fieldName: string]: Field
+    };
+}
+export interface FormData {
+    fieldsArray: Field[];
+    fieldsObject: {};
+}
+export class FormData {
 
     constructor(fields?: FieldAttributes[]) {
+        this.fieldsArray = [];
+        this.fieldsObject = {};
+
         if (typeof fields === 'undefined') return;
         if (fields instanceof Array && fields.length === 0) return;
         if (fields instanceof Array && fields.length > 0) {
@@ -166,27 +179,28 @@ export class FormState {
             })
             return;
         }
-        throw new TypeError(`FormState constructor takes one argument, which can be
+        throw new TypeError(`FormData constructor takes one argument, which can be
          of type InputField, InputField[], InputOptions[], or an Array containing a mix of InputField and InputOptions.
          Received argument: ${fields}`);
     }
 
     addField( field: Field) {
-        if (this.state.some(f => f.id === field.id)) {
+        if (this.fieldsArray.some(f => f.id === field.id)) {
             throw new TypeError(
                 `Field with id ${field.id} already exists in the form! Ids must be unique strings.`
             );
         }
         if (field.type === InputType.Radio && field.checked) {
-            const radioSiblings = this.state.filter( f => f.name === field.name) as InputField[];
+            const radioSiblings = this.fieldsArray.filter( f => f.name === field.name) as InputField[];
             radioSiblings.forEach( f => { if (f.checked) f.toggleChecked() })
         }
-        this.state.push(field);
+        this.fieldsArray.push(field);
+        this.fieldsObject = {...this.fieldsObject, [field.id]: field };
     }
 
     removeInputById(id: string) {
         let inputToRemove: string = '';
-        this.state.filter(input => {
+        this.fieldsArray.filter(input => {
             if (input.id !== id) return true;
             inputToRemove = input.id;
             return false;
@@ -194,13 +208,13 @@ export class FormState {
         return inputToRemove ? inputToRemove : null;
     }
 
-    getState() {
-        return [...this.state];
+    getState(): FormState {
+        return { fieldsArray: this.fieldsArray, fieldsObject: this.fieldsObject };
     }
 
     setFieldValue(id: string, value: InputValue) {
-        const field = this.state.find(f => f.id === id);
-        if (!field) throw new Error(`InputField with id ${id} does not exist in this FormState instance.`);
+        const field = this.fieldsArray.find(f => f.id === id);
+        if (!field) throw new Error(`InputField with id ${id} does not exist in this FormData instance.`);
         if (field instanceof InputField) {
             field.setValueAndValidate(value);
             return field;
@@ -213,10 +227,10 @@ export class FormState {
     }
 
     toggleInputChecked(id: string) {
-        const input = this.state.find(i => i.id === id);
+        const input = this.fieldsArray.find(i => i.id === id);
         if (!input)
             throw new Error(
-                `InputField with id ${id} does not exist in this FormState instance.`
+                `InputField with id ${id} does not exist in this FormData instance.`
             );
         if (input.type !== InputType.Checkbox && input.type !== InputType.Radio)
             throw new Error(
@@ -235,7 +249,7 @@ export class FormState {
         const input = this.getInputById(id);
         if (input.type !== InputType.Radio)
             throw new TypeError(`selectRadioInput only takes an InputField of type "radio", received "${input.type}".`);
-        const siblingRadios = this.state.filter( i => i.name === input.name && i.id !== input.id) as InputField[];
+        const siblingRadios = this.fieldsArray.filter( i => i.name === input.name && i.id !== input.id) as InputField[];
         if (input.checked === true ) return
         else {
             input.toggleChecked();
@@ -244,27 +258,27 @@ export class FormState {
     }
 
     getInputById(id: string) {
-        const input = this.state.find(i => i.id === id);
+        const input = this.fieldsArray.find(i => i.id === id);
         if (!input)
             throw new Error(
-                `InputField with id "${id}" does not exist in this FormState instance's state.`
+                `InputField with id "${id}" does not exist in this FormData instance's fieldsArray.`
             );
         if (!(input instanceof InputField)) throw new Error(`Field with id ${id} is not an instance of InputField.`)
         return input;
     }
 
     isValid() {
-        const valid =  !this.state.some( input => input.type !== InputType.Radio && !input.isValid());
+        const valid =  !this.fieldsArray.some( input => input.type !== InputType.Radio && !input.isValid());
         this.validateRadios();
         if (valid) return true
         else {
-            this.state.forEach( input => input.blur());
+            this.fieldsArray.forEach( input => input.blur());
             return false;
         }
     }
 
     validateRadios() {
-        const radios = this.state.filter(i => i.type === InputType.Radio);
+        const radios = this.fieldsArray.filter(i => i.type === InputType.Radio);
         let valid = true;
         radios.forEach( i => {
             if (i.type !== InputType.Radio) throw new Error(`InputField with id ${i.id} is not of type "radio", and cannot be used in the validateRadios function.`);

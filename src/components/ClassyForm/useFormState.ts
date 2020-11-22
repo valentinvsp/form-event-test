@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FormState, InputField, InputType, FieldAttributes, Field, SelectType } from './ClassyClasses';
+import { FormData, FormState, InputField, InputType, FieldAttributes, Field, SelectType } from './ClassyClasses';
 
 // TODO -> there is an issue with clicking away from a text input and onto a checkbox
 //         that the onblur event triggers and works properly, but the checkbox does not get toggled.
@@ -9,7 +9,7 @@ import { FormState, InputField, InputType, FieldAttributes, Field, SelectType } 
 //         but TypeScript does not allow having (e: React.ChangeEvent<HTMLInputElement>) to be assigned
 //         to a <form> onChange prop. This leads to "value" and "type" as being typed 'any' instead of 'string'.
 //         Find a way to correctly type these.
-type hookReturn = [ (Field)[], (e: React.ChangeEvent<HTMLFormElement>) => void, (e: React.FocusEvent<HTMLFormElement>) => void, () => boolean, (arg0: InputField[]) => void ];
+type hookReturn = [ FormState, (e: React.ChangeEvent<HTMLFormElement>) => void, (e: React.FocusEvent<HTMLFormElement>) => void, () => boolean, (arg0: InputField[]) => void ];
 
 /**
  * Takes information about the inputs you want in your form, and manages all the
@@ -21,15 +21,15 @@ type hookReturn = [ (Field)[], (e: React.ChangeEvent<HTMLFormElement>) => void, 
  * @returns a tuple containing [ state, onChangeHandler(), onBlurHandler(), isFormValid(), createNewStateObject() ]
  */
 export default function useFormState(formFieldsData?: FieldAttributes[]): hookReturn {
-    const [form, setForm] = useState<(Field)[]>([]);
-    const formRef = useRef<FormState>()
+    const [form, setForm] = useState<FormState>({ fieldsObject: {}, fieldsArray: []});
+    const formRef = useRef<FormData>()
 
     useEffect(() => {
         createForm(formFieldsData)
     }, [formFieldsData])
 
     const createForm = (formFieldsData?: FieldAttributes[]) => {
-        const createdForm = new FormState(formFieldsData)
+        const createdForm = new FormData(formFieldsData)
         setForm(createdForm.getState());
         formRef.current = createdForm;
     }

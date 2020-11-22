@@ -1,17 +1,22 @@
-import React, { /* useRef */ } from 'react';
+import React /* useRef */ from 'react';
 import { InputField, InputType, SelectField } from './ClassyClasses';
 import useFormState from './useFormState';
 import { formFieldsData } from './constants';
 import './ClassyForm.css';
 
 const ClassyForm: React.FC = () => {
-    const [formData, handleFormOnChange, handleFormBlur, formIsValid ] = useFormState(formFieldsData);
+    const [
+        formData,
+        handleFormOnChange,
+        handleFormBlur,
+        formIsValid,
+    ] = useFormState(formFieldsData);
     // const renderCount = useRef(0);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log('submitted');
-        if ( formIsValid()) console.log('all good here!');
+        if (formIsValid()) console.log('all good here!');
         else console.log('check your inputs');
     };
 
@@ -19,10 +24,36 @@ const ClassyForm: React.FC = () => {
     // renderCount.current = renderCount.current + 1;
     // console.log(`render number ${renderCount.current}`);
     return (
-        <form onChange={handleFormOnChange} onBlur={handleFormBlur} onSubmit={handleSubmit} noValidate>
-            {formData?.map( field => {
+        <form
+            onChange={handleFormOnChange}
+            onBlur={handleFormBlur}
+            onSubmit={handleSubmit}
+            noValidate
+        >
+            <div className="form-group">
+                <input
+                    id={formData.fieldsObject.username?.id}
+                    type={formData.fieldsObject.username?.type}
+                    className="form-control"
+                    name={formData.fieldsObject.username?.name}
+                    value={formData.fieldsObject.username?.value}
+                    readOnly
+                />
+            </div>
+            {formData?.fieldsArray.map(field => {
                 if (field instanceof InputField) {
-                    const { id, name, type, value, checked, label, validationError, touched, valid, placeholder } = field;
+                    const {
+                        id,
+                        name,
+                        type,
+                        value,
+                        checked,
+                        label,
+                        validationError,
+                        touched,
+                        valid,
+                        placeholder,
+                    } = field;
                     if (
                         type === InputType.Text ||
                         type === InputType.Email ||
@@ -44,24 +75,25 @@ const ClassyForm: React.FC = () => {
                                     id="emailHelp"
                                     className="form-text text-muted"
                                 >
-                                    We'll never share your email with anyone else.
+                                    We'll never share your email with anyone
+                                    else.
                                 </small>
-                                {touched && !valid && <small
-                                    className="form-text input-error validation-error"
-                                >
-                                    {validationError}
-                                </small>}
+                                {touched && !valid && (
+                                    <small className="form-text input-error validation-error">
+                                        {validationError}
+                                    </small>
+                                )}
                             </div>
                         );
                     if (type === InputType.Button)
                         return (
                             <div key={id} className="form-group">
-                            <input
-                                id={id}
-                                type="submit"
-                                className="btn btn-primary mt-3"
-                                value={value}
-                            />
+                                <input
+                                    id={id}
+                                    type="submit"
+                                    className="btn btn-primary mt-3"
+                                    value={value}
+                                />
                             </div>
                         );
                     if (type === InputType.Checkbox)
@@ -74,19 +106,25 @@ const ClassyForm: React.FC = () => {
                                     name={name}
                                     checked={checked}
                                 />
-                                <label className="form-check-label" htmlFor={name}>
+                                <label
+                                    className="form-check-label"
+                                    htmlFor={name}
+                                >
                                     {label}
                                 </label>
-                                {touched && !valid && <small
-                                    className="form-text input-error validation-error"
-                                >
-                                    {validationError}
-                                </small>}
+                                {touched && !valid && (
+                                    <small className="form-text input-error validation-error">
+                                        {validationError}
+                                    </small>
+                                )}
                             </div>
                         );
                     if (type === InputType.Radio)
                         return (
-                            <div key={id} className="form-check form-check-inline">
+                            <div
+                                key={id}
+                                className="form-check form-check-inline"
+                            >
                                 <input
                                     type={type}
                                     className="form-check-input"
@@ -95,15 +133,18 @@ const ClassyForm: React.FC = () => {
                                     checked={checked}
                                     value={value}
                                 />
-                                <label className="form-check-label" htmlFor={name}>
+                                <label
+                                    className="form-check-label"
+                                    htmlFor={name}
+                                >
                                     {label}
                                 </label>
-                                {touched && !valid && <small
-                                    className="form-text input-error validation-error"
-                                >
-                                    {validationError}
-                                </small>}
-                            </div>                
+                                {touched && !valid && (
+                                    <small className="form-text input-error validation-error">
+                                        {validationError}
+                                    </small>
+                                )}
+                            </div>
                         );
                 }
                 if (field instanceof SelectField) {
@@ -112,14 +153,15 @@ const ClassyForm: React.FC = () => {
                         <div className="form-group mt-3" key={id}>
                             <label htmlFor={id}>{label}</label>
                             <select className="form-control" id={id}>
-                                {options.map( o => <option key={o}>{o}</option>)}
+                                {options.map(o => (
+                                    <option key={o}>{o}</option>
+                                ))}
                             </select>
                         </div>
-                    )
+                    );
                 }
                 return <div key={666}>Warning! Incorect input type.</div>;
-            }
-            )}
+            })}
         </form>
     );
 };
