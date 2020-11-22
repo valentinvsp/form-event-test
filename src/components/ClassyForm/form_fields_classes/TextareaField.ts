@@ -1,18 +1,21 @@
 import { BaseField, BaseFieldAttributes } from './BaseField';
 
 export enum TextareaFieldType {
-    SelectOne = 'select-one'
+    Textarea = 'textarea'
 }
 
 export interface TextareaAttributes {
     type: TextareaFieldType;
+    placeholder?: string;
+    minLength?: number;
+    maxLength?: number;
 }
 
-export type SelectFieldAttributes = TextareaAttributes & BaseFieldAttributes;
+export type TextareaFieldAttributes = TextareaAttributes & BaseFieldAttributes;
 
-export class TextField extends BaseField implements TextareaAttributes  {
+export class TextareaField extends BaseField implements TextareaAttributes  {
     type: TextareaFieldType;
-    constructor(attributes: TextareaAttributes & BaseFieldAttributes) {
+    constructor(attributes: TextareaFieldAttributes) {
         super(attributes);
         ({ type: this.type } = attributes);
     }

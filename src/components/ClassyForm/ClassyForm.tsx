@@ -1,6 +1,6 @@
 import React /* useRef */ from 'react';
 import { InputField, InputType } from './form_fields_classes/InputFields';
-import { SelectField } from './form_fields_classes/SelectFields'
+import { SelectField } from './form_fields_classes/SelectFields';
 import useFormState from './useFormState';
 import { formFieldsData } from './constants';
 import './ClassyForm.css';
@@ -40,6 +40,22 @@ const ClassyForm: React.FC = () => {
                     value={formData.fieldsObject.username?.value}
                     readOnly
                 />
+                <small id="emailHelp" className="form-text text-muted">
+                    This one is readOnly.
+                </small>
+            </div>
+            <div className="form-group">
+                <input
+                    id={formData.fieldsObject.username?.id}
+                    type={formData.fieldsObject.username?.type}
+                    className="form-control"
+                    name={formData.fieldsObject.username?.name}
+                    value={formData.fieldsObject.username?.value}
+                    disabled
+                />
+                <small id="emailHelp" className="form-text text-muted">
+                    This one is disabled.
+                </small>
             </div>
             {formData?.fieldsArray.map(field => {
                 if (field instanceof InputField) {
