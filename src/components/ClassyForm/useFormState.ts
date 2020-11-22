@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { FormData, FormState, InputField, InputType, FieldAttributes, Field, SelectType } from './ClassyClasses';
+import { FormData, FormState, FieldAttributes } from './form_fields_classes/ClassyClasses';
+import { InputField, InputType } from './form_fields_classes/InputFields'
+import { SelectType } from './form_fields_classes/SelectFields'
 
 // TODO -> there is an issue with clicking away from a text input and onto a checkbox
 //         that the onblur event triggers and works properly, but the checkbox does not get toggled.

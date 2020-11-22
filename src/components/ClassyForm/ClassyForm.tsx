@@ -1,5 +1,6 @@
 import React /* useRef */ from 'react';
-import { InputField, InputType, SelectField } from './ClassyClasses';
+import { InputField, InputType } from './form_fields_classes/InputFields';
+import { SelectField } from './form_fields_classes/SelectFields'
 import useFormState from './useFormState';
 import { formFieldsData } from './constants';
 import './ClassyForm.css';

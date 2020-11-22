@@ -1,4 +1,6 @@
-import { FieldAttributes, InputType, SelectType } from './ClassyClasses';
+import { FieldAttributes } from './form_fields_classes/ClassyClasses';
+import { SelectType } from './form_fields_classes/SelectFields'
+import { InputType } from './form_fields_classes/InputFields'
 
 export const formFieldsData: FieldAttributes[] = [
     {
